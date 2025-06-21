@@ -26,84 +26,94 @@ type model struct {
 
 func initialModel() model {
 	// Create text input fields
-	inputs := make([]textinput.Model, 12)
+	inputs := make([]textinput.Model, 13)
 	inputsByPage := [][]textinput.Model{
+		// inputs[a:b] not inclusive of b
 		inputs[0:3],
-		inputs[3:6],
-		inputs[6:12],
+		inputs[3:8],
+		inputs[8:13],
 	}
 	model := model{
 		inputsByPage: inputsByPage,
 		inputs:       inputs,
 		currentPage:  0, // Start on the first page
 	}
+	// Title field
+	dive_title := textinput.New()
+	dive_title.Placeholder = "Name your dive"
+	dive_title.Focus()
+	dive_title.Width = 40
+	inputs[0] = dive_title
 
 	// Name field
 	dive_site := textinput.New()
 	dive_site.Placeholder = "Where did you dive?"
-	dive_site.Focus()
-	dive_site.Width = 30
-	inputs[0] = dive_site
+	dive_site.Width = 40
+	inputs[1] = dive_site
 
 	when_was_the_dive := textinput.New()
-	when_was_the_dive.Placeholder = "Enter your date"
-	when_was_the_dive.Width = 30
-	inputs[1] = when_was_the_dive
+	when_was_the_dive.Placeholder = "When did you dive?"
+	when_was_the_dive.Width = 40
+	inputs[2] = when_was_the_dive
 
 	dive_type := textinput.New()
 	dive_type.Placeholder = "Enter your dive type e.g. boat"
-	dive_type.Width = 30
-	inputs[2] = dive_type
+	dive_type.Width = 40
+	inputs[3] = dive_type
+
+	water_body := textinput.New()
+	water_body.Placeholder = "What type of water were you diving in?"
+	water_body.Width = 40
+	inputs[4] = water_body
 
 	// Depth / time fields
 	bottom_time := textinput.New()
 	bottom_time.Placeholder = "Enter your bottom time"
-	bottom_time.Width = 30
-	inputs[3] = bottom_time
+	bottom_time.Width = 40
+	inputs[5] = bottom_time
 
 	max_depth := textinput.New()
 	max_depth.Placeholder = "Enter your max depth"
-	max_depth.Width = 30
-	inputs[4] = max_depth
+	max_depth.Width = 40
+	inputs[6] = max_depth
 
 	// Temperature fields
 	surface_temp := textinput.New()
 	surface_temp.Placeholder = "Enter the surface temp"
-	surface_temp.Width = 30
-	inputs[5] = surface_temp
+	surface_temp.Width = 40
+	inputs[7] = surface_temp
 
 	bottom_temp := textinput.New()
 	bottom_temp.Placeholder = "Enter the bottom temp"
-	bottom_temp.Width = 30
-	inputs[6] = bottom_temp
+	bottom_temp.Width = 40
+	inputs[8] = bottom_temp
 
 	// Gear fields
 	weight := textinput.New()
 	weight.Placeholder = "Enter your weight"
-	weight.Width = 30
-	inputs[7] = weight
+	weight.Width = 40
+	inputs[9] = weight
 
 	suit_type := textinput.New()
 	suit_type.Placeholder = "Enter your suit type e.g. wetsuit"
-	suit_type.Width = 30
-	inputs[8] = suit_type
+	suit_type.Width = 40
+	inputs[10] = suit_type
 
 	// Gas fields
 	start_gas := textinput.New()
 	start_gas.Placeholder = "Enter your start gas"
-	start_gas.Width = 30
-	inputs[9] = start_gas
+	start_gas.Width = 40
+	inputs[11] = start_gas
 	end_gas := textinput.New()
 	end_gas.Placeholder = "Enter your end gas"
-	end_gas.Width = 30
-	inputs[10] = end_gas
+	end_gas.Width = 40
+	inputs[12] = end_gas
 
 	// Notes field
 	notes := textinput.New()
 	notes.Placeholder = "Enter any notes"
 	notes.Width = 30
-	inputs[11] = notes
-
+	inputs = append(inputs, notes)
 	return model
 }
 
@@ -190,6 +200,25 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				if m.currentPage < len(m.inputsByPage)-1 {
 					m.currentPage++
 					m.focusIndex = 0 // Reset focus to the first field of the next page
+				}
+			}
+			for i := range m.inputsByPage[m.currentPage] {
+				if i == m.focusIndex {
+					m.inputsByPage[m.currentPage][i].Focus()
+				} else {
+					m.inputsByPage[m.currentPage][i].Blur()
+				}
+			}
+		case tea.KeyShiftTab:
+			// Navigate to the previous input field
+			if m.focusIndex > 0 {
+				// Move to the previous input field in the current page
+				m.focusIndex--
+			} else {
+				// Move to the previous page if at the start of the current page
+				if m.currentPage > 0 {
+					m.currentPage--
+					m.focusIndex = len(m.inputsByPage[m.currentPage]) - 1 // Set focus to the last field of the previous page
 				}
 			}
 			for i := range m.inputsByPage[m.currentPage] {
